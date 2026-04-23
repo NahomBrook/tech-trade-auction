@@ -6,6 +6,7 @@ export default defineConfig({
   schema: 'prisma/schema.prisma',
   migrations: {
     path: 'prisma/migrations',
+    seed: 'tsx prisma/seed.ts',
   },
 
   // engine: "classic" → Prisma CLI uses the Rust query engine over a direct TCP
