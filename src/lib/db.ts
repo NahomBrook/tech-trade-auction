@@ -1,7 +1,7 @@
 // Author: Nahom Brook
 import { neonConfig } from '@neondatabase/serverless'
 import { PrismaNeon } from '@prisma/adapter-neon'
-import { PrismaClient } from '@/app/generated/prisma'
+import { PrismaClient } from '@/app/generated/prisma/client'
 import ws from 'ws'
 
 // Node.js environments (Next.js server) do not ship a native WebSocket.
