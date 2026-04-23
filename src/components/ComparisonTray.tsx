@@ -32,8 +32,8 @@ export function ComparisonTray() {
                   src={item.imageUrl}
                   alt={item.model}
                   fill
+                  sizes="36px"
                   className="object-cover"
-                  unoptimized
                 />
               </div>
               <span className="text-sm font-bold whitespace-nowrap">

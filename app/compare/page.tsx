@@ -1,3 +1,4 @@
+// Author: Nahom Brook
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft } from 'lucide-react'
@@ -9,30 +10,31 @@ interface PageProps {
 }
 
 type SpecRow = {
-  label: string
-  key: keyof Product
-  format?: (v: unknown) => string
+  label:     string
+  key:       keyof Product
+  format?:   (v: unknown) => string
   highlight: boolean
+  winner:    'max' | 'min' | null
 }
 
 const SPEC_ROWS: SpecRow[] = [
-  { label: 'Brand',          key: 'brand',         highlight: false },
-  { label: 'Category',       key: 'category',      highlight: false },
-  { label: 'Condition',      key: 'condition',     highlight: false },
-  { label: 'Processor',      key: 'processor',     highlight: true  },
-  { label: 'RAM',            key: 'ram',           format: (v) => `${v} GB`,  highlight: true  },
-  { label: 'Storage',        key: 'storage',       format: (v) => `${v} GB`,  highlight: false },
-  { label: 'Battery Health', key: 'batteryHealth', format: (v) => `${v}%`,    highlight: true  },
-  { label: 'Starting Price', key: 'price',         format: (v) => `$${Number(v).toLocaleString()}`, highlight: false },
+  { label: 'Brand',          key: 'brand',         highlight: false, winner: null },
+  { label: 'Category',       key: 'category',      highlight: false, winner: null },
+  { label: 'Condition',      key: 'condition',     highlight: false, winner: null },
+  { label: 'Processor',      key: 'processor',     highlight: true,  winner: null },
+  { label: 'RAM',            key: 'ram',           format: (v) => `${v} GB`,  highlight: true,  winner: 'max' },
+  { label: 'Storage',        key: 'storage',       format: (v) => `${v} GB`,  highlight: true,  winner: 'max' },
+  { label: 'Battery Health', key: 'batteryHealth', format: (v) => `${v}%`,    highlight: true,  winner: 'max' },
+  { label: 'Starting Price', key: 'price',         format: (v) => `$${Number(v).toLocaleString()}`, highlight: true, winner: 'min' },
 ]
 
 export default async function ComparePage({ searchParams }: PageProps) {
   const { ids } = await searchParams
-  const idList = ids?.split(',').filter(Boolean) ?? []
+  const idList   = ids?.split(',').filter(Boolean) ?? []
 
   if (idList.length < 2) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center gap-6 px-4">
+      <main className="min-h-screen flex flex-col items-center justify-center gap-6 px-4 bg-white">
         <p className="text-2xl font-black uppercase tracking-widest text-center">
           Select 2–3 items to compare.
         </p>
@@ -52,47 +54,45 @@ export default async function ComparePage({ searchParams }: PageProps) {
 
   return (
     <main className="min-h-screen bg-white pb-16">
-      {/* Sticky header */}
-      <div className="border-b-2 border-black px-8 py-5 flex items-center justify-between sticky top-0 bg-white z-10">
+      {/* ── Sticky header ──────────────────────────────────────────────── */}
+      <div className="sticky top-0 z-10 bg-white border-b-2 border-black px-8 py-4 flex items-center justify-between">
         <Link
           href="/"
           className="flex items-center gap-2 text-sm font-black uppercase tracking-widest hover:opacity-50 transition-opacity"
         >
           <ArrowLeft size={14} /> All Listings
         </Link>
-        <h1 className="text-lg font-black uppercase tracking-widest">Side-by-Side</h1>
+        <h1 className="text-sm font-black uppercase tracking-widest">Side-by-Side</h1>
         <span className="text-sm font-bold text-zinc-400">{products.length} items</span>
       </div>
 
-      {/* Comparison table */}
+      {/* ── Comparison table ────────────────────────────────────────────── */}
       <div className="overflow-x-auto">
         <table className="w-full border-collapse min-w-[580px]">
-          {/* Product header row */}
+          {/* Product headers */}
           <thead>
             <tr>
               <th className="w-44 border-2 border-black p-4 bg-zinc-50 text-left text-[10px] font-black uppercase tracking-widest align-bottom">
                 Specification
               </th>
               {products.map((p) => (
-                <th
-                  key={p.id}
-                  className="border-2 border-black p-5 text-center min-w-[210px] align-top"
-                >
-                  <div className="relative w-20 h-20 mx-auto border-2 border-black overflow-hidden mb-3">
+                <th key={p.id} className="border-2 border-black p-5 text-center min-w-[220px] align-top bg-white">
+                  {/* Product image */}
+                  <div className="relative w-24 h-24 mx-auto border-2 border-black overflow-hidden mb-3">
                     <Image
                       src={p.imageUrl}
                       alt={p.model}
                       fill
+                      sizes="96px"
                       className="object-cover"
-                      unoptimized
                     />
                   </div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
                     {p.brand}
                   </p>
                   <p className="text-base font-black leading-tight mt-0.5">{p.model}</p>
-                  <p className="text-xl font-black mt-1">${p.price.toLocaleString()}</p>
-                  <span className="inline-block mt-2 border-2 border-black text-[10px] font-black px-2 py-0.5 uppercase tracking-widest">
+                  <p className="text-2xl font-black mt-2">${p.price.toLocaleString()}</p>
+                  <span className="inline-block mt-2 border-2 border-black text-[9px] font-black px-2 py-0.5 uppercase tracking-widest">
                     {p.condition}
                   </span>
                 </th>
@@ -102,26 +102,26 @@ export default async function ComparePage({ searchParams }: PageProps) {
 
           {/* Spec rows */}
           <tbody>
-            {SPEC_ROWS.map(({ label, key, format, highlight }) => {
-              const values = products.map((p) => p[key])
-              const isDiff = highlight && new Set(values.map(String)).size > 1
+            {SPEC_ROWS.map(({ label, key, format, highlight, winner }) => {
+              const values  = products.map((p) => p[key])
+              const isDiff  = highlight && new Set(values.map(String)).size > 1
 
               return (
                 <tr key={key} className={isDiff ? 'bg-amber-50' : ''}>
                   <td className="border-2 border-black p-4 bg-zinc-50">
                     <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
-                    {isDiff && <span className="ml-2 text-amber-500">↕</span>}
+                    {isDiff && <span className="ml-1.5 text-amber-500 text-xs">↕</span>}
                   </td>
 
                   {products.map((p) => {
-                    const raw = p[key]
+                    const raw     = p[key]
                     const display = format ? format(raw) : String(raw ?? '—')
-                    const best = isDiff && isBest(key, raw, values)
+                    const best    = isDiff && winner !== null && isBest(winner, raw, values)
 
                     return (
                       <td
                         key={p.id}
-                        className={`border-2 border-black p-4 text-center text-sm font-bold ${
+                        className={`border-2 border-black p-4 text-center text-sm font-bold transition-colors ${
                           best ? 'bg-emerald-50' : ''
                         }`}
                       >
@@ -144,10 +144,8 @@ export default async function ComparePage({ searchParams }: PageProps) {
   )
 }
 
-function isBest(key: keyof Product, value: unknown, all: unknown[]): boolean {
+function isBest(winner: 'max' | 'min', value: unknown, all: unknown[]): boolean {
   const nums = all.map(Number)
-  const n = Number(value)
-  if (key === 'price') return n === Math.min(...nums)
-  if (['ram', 'storage', 'batteryHealth'].includes(key as string)) return n === Math.max(...nums)
-  return false
+  const n    = Number(value)
+  return winner === 'min' ? n === Math.min(...nums) : n === Math.max(...nums)
 }
