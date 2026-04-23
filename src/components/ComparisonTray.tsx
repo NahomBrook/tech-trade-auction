@@ -13,21 +13,23 @@ export function ComparisonTray() {
   const compareHref = `/compare?ids=${selectedProductIds.join(',')}`
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 bg-white border-t-2 border-black shadow-[0_-4px_0_0_#000]">
+    <div className="fixed bottom-0 inset-x-0 z-40 bg-[#232F3E] border-t-2 border-[#FF9900] shadow-[0_-4px_24px_rgba(0,0,0,0.3)]">
       <div className="max-w-7xl mx-auto px-6 py-3 flex items-center gap-4">
+
         {/* Label */}
-        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 shrink-0">
-          Compare&nbsp;({selectedItems.length}/3)
-        </p>
+        <div className="shrink-0 hidden sm:block">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#FF9900]">Compare</p>
+          <p className="text-[10px] text-white/60">{selectedItems.length} of 3</p>
+        </div>
 
         {/* Items */}
-        <div className="flex-1 flex items-center gap-3 overflow-x-auto min-w-0">
+        <div className="flex-1 flex items-center gap-3 overflow-x-auto min-w-0 pb-0.5">
           {selectedItems.map((item) => (
             <div
               key={item.id}
-              className="flex items-center gap-2 border-2 border-black px-2 py-1.5 shrink-0"
+              className="flex items-center gap-2 bg-white/10 border border-white/20 px-2.5 py-1.5 rounded-sm shrink-0"
             >
-              <div className="relative w-9 h-9 border border-black overflow-hidden shrink-0">
+              <div className="relative w-9 h-9 rounded-sm overflow-hidden border border-white/30 shrink-0 bg-white">
                 <Image
                   src={item.imageUrl}
                   alt={item.model}
@@ -36,15 +38,15 @@ export function ComparisonTray() {
                   className="object-cover"
                 />
               </div>
-              <span className="text-sm font-bold whitespace-nowrap">
+              <span className="text-sm font-medium text-white whitespace-nowrap">
                 {item.brand} {item.model}
               </span>
               <button
                 onClick={() => toggleProduct(item)}
-                className="ml-1 hover:opacity-40 transition-opacity cursor-pointer"
+                className="ml-1 text-white/50 hover:text-white transition-colors cursor-pointer"
                 aria-label={`Remove ${item.model}`}
               >
-                <X size={13} strokeWidth={2.5} />
+                <X size={13} />
               </button>
             </div>
           ))}
@@ -53,8 +55,10 @@ export function ComparisonTray() {
           {Array.from({ length: 3 - selectedItems.length }).map((_, i) => (
             <div
               key={`slot-${i}`}
-              className="w-36 h-14 border-2 border-dashed border-zinc-300 shrink-0"
-            />
+              className="w-40 h-14 border border-dashed border-white/20 rounded-sm shrink-0 flex items-center justify-center"
+            >
+              <span className="text-[10px] text-white/30 uppercase tracking-wide">Add item</span>
+            </div>
           ))}
         </div>
 
@@ -62,7 +66,7 @@ export function ComparisonTray() {
         <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={clearStore}
-            className="text-xs font-black uppercase tracking-widest underline hover:opacity-50 transition-opacity cursor-pointer"
+            className="text-xs text-white/60 hover:text-white underline transition-colors cursor-pointer hidden sm:block"
           >
             Clear
           </button>
@@ -70,12 +74,14 @@ export function ComparisonTray() {
           {selectedItems.length >= 2 ? (
             <Link
               href={compareHref}
-              className="bg-black text-white px-5 py-3 text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-colors whitespace-nowrap"
+              className="bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200]
+                text-[#0F1111] px-5 py-2.5 text-xs font-bold rounded-full
+                transition-colors whitespace-nowrap"
             >
               Compare Now →
             </Link>
           ) : (
-            <span className="border-2 border-zinc-200 px-5 py-3 text-xs font-black uppercase tracking-widest text-zinc-300 whitespace-nowrap">
+            <span className="border border-white/20 rounded-full px-5 py-2.5 text-xs font-bold text-white/30 whitespace-nowrap">
               Select {2 - selectedItems.length} more
             </span>
           )}

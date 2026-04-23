@@ -2,16 +2,17 @@
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useCallback } from 'react'
+import { ChevronRight } from 'lucide-react'
 
-const CATEGORIES = ['Laptop', 'Phone']
-const CONDITIONS = ['Excellent', 'Good', 'Fair']
+const CATEGORIES  = ['Laptop', 'Phone']
+const CONDITIONS  = ['Excellent', 'Good', 'Fair']
 const RAM_OPTIONS = [8, 16, 32, 64]
-const BATTERY_OPTIONS = [75, 80, 85, 90, 95]
+const BAT_OPTIONS = [75, 80, 85, 90, 95]
 
 export function FilterSidebar() {
-  const router = useRouter()
+  const router   = useRouter()
   const pathname = usePathname()
-  const params = useSearchParams()
+  const params   = useSearchParams()
 
   const update = useCallback(
     (key: string, value: string) => {
@@ -22,107 +23,141 @@ export function FilterSidebar() {
     [params, pathname, router],
   )
 
+  const active = (key: string, val: string) => params.get(key) === val
+
   return (
-    <aside className="w-52 shrink-0">
-      <div className="border-2 border-black p-5 space-y-7 sticky top-6">
-        <FilterGroup title="Category">
-          <FilterChip
-            label="All"
+    <aside className="w-56 shrink-0 self-start sticky top-[72px]">
+      <div className="bg-white border border-[#D5D9D9] rounded-sm overflow-hidden">
+
+        {/* Header */}
+        <div className="px-4 py-3 border-b border-[#D5D9D9] bg-[#f7f8f8]">
+          <h2 className="text-sm font-bold text-[#0F1111]">Filter by</h2>
+        </div>
+
+        {/* Category */}
+        <Section title="Category">
+          <RadioItem
+            label="All Categories"
             active={!params.get('category')}
             onClick={() => update('category', '')}
           />
           {CATEGORIES.map((c) => (
-            <FilterChip
+            <RadioItem
               key={c}
               label={c}
-              active={params.get('category') === c}
+              active={active('category', c)}
               onClick={() => update('category', c)}
             />
           ))}
-        </FilterGroup>
+        </Section>
 
-        <FilterGroup title="Condition">
-          <FilterChip
-            label="Any"
+        <Divider />
+
+        {/* Condition */}
+        <Section title="Condition">
+          <RadioItem
+            label="Any Condition"
             active={!params.get('condition')}
             onClick={() => update('condition', '')}
           />
           {CONDITIONS.map((c) => (
-            <FilterChip
+            <RadioItem
               key={c}
               label={c}
-              active={params.get('condition') === c}
+              active={active('condition', c)}
               onClick={() => update('condition', c)}
             />
           ))}
-        </FilterGroup>
+        </Section>
 
-        <FilterGroup title="Min RAM">
-          <FilterChip
+        <Divider />
+
+        {/* Min RAM */}
+        <Section title="Min RAM">
+          <RadioItem
             label="Any"
             active={!params.get('ram')}
             onClick={() => update('ram', '')}
           />
           {RAM_OPTIONS.map((gb) => (
-            <FilterChip
+            <RadioItem
               key={gb}
-              label={`${gb} GB+`}
-              active={params.get('ram') === String(gb)}
+              label={`${gb} GB & up`}
+              active={active('ram', String(gb))}
               onClick={() => update('ram', String(gb))}
             />
           ))}
-        </FilterGroup>
+        </Section>
 
-        <FilterGroup title="Min Battery Health">
-          <FilterChip
+        <Divider />
+
+        {/* Battery */}
+        <Section title="Min Battery Health">
+          <RadioItem
             label="Any"
             active={!params.get('battery')}
             onClick={() => update('battery', '')}
           />
-          {BATTERY_OPTIONS.map((pct) => (
-            <FilterChip
+          {BAT_OPTIONS.map((pct) => (
+            <RadioItem
               key={pct}
-              label={`${pct}%+`}
-              active={params.get('battery') === String(pct)}
+              label={`${pct}% & up`}
+              active={active('battery', String(pct))}
               onClick={() => update('battery', String(pct))}
             />
           ))}
-        </FilterGroup>
+        </Section>
+
+        {/* Clear all */}
+        {(params.get('category') || params.get('condition') || params.get('ram') || params.get('battery') || params.get('q')) && (
+          <>
+            <Divider />
+            <div className="px-4 py-3">
+              <button
+                onClick={() => router.push(pathname)}
+                className="text-[#007185] text-sm hover:text-[#C7511F] hover:underline transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <ChevronRight size={12} /> Clear all filters
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </aside>
   )
 }
 
-function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div>
-      <p className="text-[10px] font-black uppercase tracking-widest pb-2 mb-2 border-b-2 border-black">
-        {title}
-      </p>
-      <div className="space-y-0.5">{children}</div>
+    <div className="px-4 py-3">
+      <p className="text-xs font-bold text-[#0F1111] uppercase tracking-wide mb-2">{title}</p>
+      <ul className="space-y-0.5">{children}</ul>
     </div>
   )
 }
 
-function FilterChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string
-  active: boolean
-  onClick: () => void
-}) {
+function Divider() {
+  return <hr className="border-[#D5D9D9]" />
+}
+
+function RadioItem({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      className={`w-full text-left px-3 py-1.5 text-sm font-bold border-2 transition-colors cursor-pointer ${
-        active
-          ? 'border-black bg-black text-white'
-          : 'border-transparent text-black hover:border-black'
-      }`}
-    >
-      {label}
-    </button>
+    <li>
+      <button
+        onClick={onClick}
+        className={`w-full text-left text-sm py-1 px-2 rounded-sm flex items-center gap-2 transition-colors cursor-pointer ${
+          active
+            ? 'text-[#C7511F] font-semibold'
+            : 'text-[#0F1111] hover:text-[#C7511F]'
+        }`}
+      >
+        <span
+          className={`inline-flex w-3.5 h-3.5 rounded-full border-2 shrink-0 ${
+            active ? 'border-[#FF9900] bg-[#FF9900]' : 'border-[#D5D9D9]'
+          }`}
+        />
+        {label}
+      </button>
+    </li>
   )
 }
